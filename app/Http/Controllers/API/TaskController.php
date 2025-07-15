@@ -24,7 +24,7 @@ class TaskController extends Controller
      */
     public function index()
     {
-        return $this->taskService->getUserTasks(Auth::user());
+        return $this->taskService->getTasks(Auth::user());
     }
 
     /**

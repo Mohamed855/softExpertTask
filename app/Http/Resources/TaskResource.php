@@ -17,7 +17,7 @@ class TaskResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
+            'title' => $this->title,
             'description' => $this->description,
             'due_date' => $this->due_date->format('D, d-m-Y'),
             'status' => Task::STATUSES[(int) $this->status],

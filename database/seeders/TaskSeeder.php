@@ -19,7 +19,7 @@ class TaskSeeder extends Seeder
             $manager = User::where('role', 'manager')->first();
             for($i = 1; $i <= 5; $i++) {
                 Task::create([
-                    'name' => 'Task ' . $i,
+                    'title' => 'Task ' . $i,
                     'description' => 'Task details ' . $i,
                     'assigned_to' => $user->id,
                     'due_date' => now()->addDays($i),

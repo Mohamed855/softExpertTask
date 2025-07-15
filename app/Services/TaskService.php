@@ -11,18 +11,18 @@ class TaskService
 {
     use ResponseTrait;
 
-    public function getUserTasks($user)
+    public function getTasks($user)
     {
-        $userTasks = $user->isUser() ? $user->tasks()->get() : $user->createdTasks()->get();
-        $message = $user->isUser() ? 'User tasks' : 'Manager created tasks';
-        $userTasks->load(['assignee', 'assignedBy', 'dependencies']);
-        return $this->success($message, TaskResource::collection($userTasks));
+        $tasks = $user->isUser() ? $user->tasks()->get() : Task::get();
+        $message = $user->isUser() ? 'User tasks' : 'All tasks';
+        $tasks->load(['assignee', 'assignedBy', 'dependencies']);
+        return $this->success($message, TaskResource::collection($tasks));
     }
 
     public function getSingleTask(Task $task)
     {
         $task->load(['assignee', 'assignedBy', 'dependencies']);
-        return $this->success('Task (' . $task->name . ')', new TaskResource($task));
+        return $this->success('Task (' . $task->title . ')', new TaskResource($task));
     }
 
     public function createNewTask($data)
@@ -57,8 +57,12 @@ class TaskService
 
     public function updateTaskStatus(Task $task, $status)
     {
+        $user = Auth::user();
+        if ($user->isUser() && $task->assignee !== $user->id) {
+            return $this->unauthorized("You can't update the status of a task not assigned to you");
+        }
         if (! $task->allDependenciesCompleted() && $status === '2') {
-            return $this->error('All dependencies must completed first', $task->dependencies());
+            return $this->error('All dependencies must completed first');
         }
         $task->update(['status' => $status]);
         return $this->success('Task status has been updated', new TaskResource($task));
