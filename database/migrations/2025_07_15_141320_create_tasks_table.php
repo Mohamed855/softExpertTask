@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -18,7 +17,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->foreignId('assigned_to')->nullable()->constrained('users')->nullOnDelete();
             $table->date('due_date')->nullable();
-            $table->enum('status', ['pending', 'in_progress', 'completed', 'canceled'])->default('pending');
+            $table->tinyInteger('status')->default(0);
             $table->foreignId('assigned_by')->constrained('users');
             $table->timestamps();
         });

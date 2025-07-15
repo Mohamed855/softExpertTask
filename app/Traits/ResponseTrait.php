@@ -32,7 +32,7 @@ trait ResponseTrait
         return $this->error($message, [], 403);
     }
 
-    public function notFound($message = 'Resource not found')
+    public function notFound($message = 'Not found')
     {
         return $this->error($message, [], 404);
     }

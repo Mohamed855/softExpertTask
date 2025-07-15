@@ -7,13 +7,31 @@ use Illuminate\Database\Eloquent\Model;
 class Task extends Model
 {
     protected $fillable = [
-        'title',
+        'name',
         'description',
         'assigned_to',
         'assigned_by',
         'due_date',
         'status',
     ];
+
+    protected $casts = [
+      'due_date' => 'date',
+    ];
+
+    public const STATUSES = [
+        0 => 'Pending',
+        1 => 'In progress',
+        2 => 'Completed',
+        3 => 'Cancelled'
+    ];
+
+    public function getStatus()
+    {
+        return self::STATUSES[$this->status] ?? 'Unknown';
+    }
+
+    // relations
 
     public function assignee()
     {
@@ -32,6 +50,6 @@ class Task extends Model
 
     public function allDependenciesCompleted()
     {
-        return $this->dependencies()->where('status', '!=', 'completed')->count() === 0;
+        return $this->dependencies()->where('status', '!=', '2')->count() === 0;
     }
 }
