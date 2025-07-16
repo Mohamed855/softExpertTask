@@ -27,6 +27,10 @@ class TaskService
     public function getSingleTask(Task $task)
     {
         try {
+            $user = Auth::user();
+            if ($user->isUser() && $task->assignee !== $user->id) {
+                return $this->unauthorized("You can't view details of a task not assigned to you");
+            }
             $task->load(['assignee', 'assignedBy', 'dependencies']);
             return $this->success('Task (' . $task->title . ')', new TaskResource($task));
         } catch (Exception $e) {
