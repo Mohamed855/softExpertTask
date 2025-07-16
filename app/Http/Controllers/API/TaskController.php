@@ -22,9 +22,9 @@ class TaskController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return $this->taskService->getTasks(Auth::user());
+        return $this->taskService->getTasks(Auth::user(), $request->all());
     }
 
     /**
@@ -58,6 +58,19 @@ class TaskController extends Controller
     public function destroy(Task $task)
     {
         return $this->taskService->deleteTask($task);
+    }
+
+    /**
+     * Add dependencies for specified resource in storage.
+     */
+    public function assignDependency(Request $request, Task $task)
+    {
+        $request->validate([
+            'dependencies' => 'required|array',
+            'dependencies.*' => 'required|exists:tasks,id|not_in:' . $task->id,
+        ]);
+
+        return $this->taskService->assignTaskDependency($task, $request->dependencies);
     }
 
     /**

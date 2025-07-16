@@ -11,11 +11,27 @@ class TaskService
 {
     use ResponseTrait;
 
-    public function getTasks($user)
+    public function getTasks($user, $filters)
     {
-        $tasks = $user->isUser() ? $user->tasks()->get() : Task::get();
+        $query = $user->isUser() ? $user->tasks() : Task::query();
+
+        // Filter tasks according to [status, assigned_to, due_date_from, due_date_to]
+        if (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+        if (! empty($filters['assigned_to'])) {
+            $query->where('assigned_to', $filters['assigned_to']);
+        }
+        if (! empty($filters['due_date_from']) && ! empty($filters['due_date_to'])) {
+            $query->whereBetween('due_date', [$filters['due_date_from'], $filters['due_date_to']]);
+        } elseif (! empty($filters['due_date_from'])) {
+            $query->whereDate('due_date', '>=', $filters['due_date_from']);
+        } elseif (! empty($filters['due_date_to'])) {
+            $query->whereDate('due_date', '<=', $filters['due_date_to']);
+        }
+
+        $tasks = $query->with(['assignee', 'assignedBy', 'dependencies'])->paginate(10);
         $message = $user->isUser() ? 'User tasks' : 'All tasks';
-        $tasks->load(['assignee', 'assignedBy', 'dependencies']);
         return $this->success($message, TaskResource::collection($tasks));
     }
 
@@ -39,7 +55,7 @@ class TaskService
     {
         $user = Auth::user();
         if (! $user->isManager()) {
-            return $this->unauthorized('Manager only can update task details');
+            return $this->unauthorized('Only manager can update task details');
         }
         $task->update($data);
         return $this->success('Task has been updated', new TaskResource($task));
@@ -49,10 +65,20 @@ class TaskService
     {
         $user = Auth::user();
         if (! $user->isManager()) {
-            return $this->unauthorized('Manager only can delete task');
+            return $this->unauthorized('Only managers can delete task');
         }
         $task->delete();
         return $this->success('Task has been deleted');
+    }
+
+    public function assignTaskDependency(Task $task, $dependencies)
+    {
+        $user = Auth::user();
+        if (! $user->isManager()) {
+            return $this->unauthorized('Only managers can add dependencies for a task');
+        }
+        $task->dependencies()->sync($dependencies);
+        return $this->success('Dependencies has been assigned to a task', new TaskResource($task));
     }
 
     public function updateTaskStatus(Task $task, $status)

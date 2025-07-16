@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\API\TaskRequest;
+use App\Http\Resources\TaskResource;
 use App\Http\Resources\UserResource;
 use App\Models\Task;
 use App\Models\User;
@@ -26,6 +27,12 @@ class ListController extends Controller
     {
         $managers = User::where('role', 'manager')->get();
         return $this->success('Managers list', UserResource::collection($managers));
+    }
+
+    public function tasks()
+    {
+        $tasks = Task::select('id', 'title')->get();
+        return $this->success('Tasks list', $tasks);
     }
 
     public function taskStatuses()
