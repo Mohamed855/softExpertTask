@@ -12,8 +12,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::any('logout', [AuthController::class, 'logout']);
     // tasks
     Route::resource('tasks', TaskController::class)->except(['create', 'edit']);
-    Route::post('tasks/assign-dependencies/{task}', [TaskController::class, 'assignDependency']);
-    Route::post('tasks/update-status/{task}', [TaskController::class, 'updateStatus']);
+    Route::post('tasks/{task}/assign-dependencies', [TaskController::class, 'assignDependency']);
+    Route::post('tasks/{task}/update-status', [TaskController::class, 'updateStatus']);
     // lists
     Route::get('users', [ListController::class, 'users']);
     Route::get('managers', [ListController::class, 'managers']);

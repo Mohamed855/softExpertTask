@@ -6,17 +6,28 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\API\TaskRequest;
 use App\Models\Task;
 use App\Services\TaskService;
+use App\Traits\ResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class TaskController extends Controller
 {
+    use ResponseTrait;
     public TaskService $taskService;
 
     public function __construct(TaskService $taskService)
     {
         $this->taskService = $taskService;
+
+        $this->middleware(function ($request, $next) {
+            $user = Auth::user();
+            $method = $request->route()->getActionMethod();
+            if (! $user->isManager() && in_array($method, ['store', 'update', 'destroy', 'assignDependency'])) {
+                return $this->unauthorized('Only managers allowed to do this action');
+            }
+            return $next($request);
+        });
     }
 
     /**

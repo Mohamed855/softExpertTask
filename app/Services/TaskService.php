@@ -28,7 +28,7 @@ class TaskService
     {
         try {
             $user = Auth::user();
-            if ($user->isUser() && $task->assignee !== $user->id) {
+            if ($user->isUser() && $task->assignee?->id !== $user->id) {
                 return $this->unauthorized("You can't view details of a task not assigned to you");
             }
             $task->load(['assignee', 'assignedBy', 'dependencies']);
@@ -41,11 +41,7 @@ class TaskService
     public function createNewTask($data)
     {
         try {
-            $user = Auth::user();
-            if (! $user->isManager()) {
-                return $this->unauthorized('Manager only can create tasks');
-            }
-            $task = Task::create(array_merge($data, ['assigned_by' => $user->id]));
+            $task = Task::create(array_merge($data, ['assigned_by' => Auth::id()]));
             return $this->success('Task has been created', new TaskResource($task));
         } catch (Exception $e) {
             return $this->error($e->getMessage());
@@ -55,10 +51,6 @@ class TaskService
     public function updateTaskDetails(Task $task, $data)
     {
         try {
-            $user = Auth::user();
-            if (! $user->isManager()) {
-                return $this->unauthorized('Only manager can update task details');
-            }
             $task->update($data);
             return $this->success('Task has been updated', new TaskResource($task));
         } catch (Exception $e) {
@@ -69,10 +61,6 @@ class TaskService
     public function deleteTask(Task $task)
     {
         try {
-            $user = Auth::user();
-            if (! $user->isManager()) {
-                return $this->unauthorized('Only managers can delete task');
-            }
             $task->delete();
             return $this->success('Task has been deleted');
         } catch (Exception $e) {
@@ -83,10 +71,6 @@ class TaskService
     public function assignTaskDependency(Task $task, $dependencies)
     {
         try {
-            $user = Auth::user();
-            if (! $user->isManager()) {
-                return $this->unauthorized('Only managers can add dependencies for a task');
-            }
             $task->dependencies()->sync($dependencies);
             return $this->success('Dependencies has been assigned to a task', new TaskResource($task));
         } catch (Exception $e) {
@@ -98,7 +82,7 @@ class TaskService
     {
         try {
             $user = Auth::user();
-            if ($user->isUser() && $task->assignee !== $user->id) {
+            if ($user->isUser() && $task->assignee?->id !== $user->id) {
                 return $this->unauthorized("You can't update the status of a task not assigned to you");
             }
             if (! $task->allDependenciesCompleted() && $status === '2') {

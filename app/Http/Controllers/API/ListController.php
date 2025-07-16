@@ -7,10 +7,23 @@ use App\Http\Resources\UserResource;
 use App\Models\Task;
 use App\Models\User;
 use App\Traits\ResponseTrait;
+use Illuminate\Support\Facades\Auth;
 
 class ListController extends Controller
 {
     use ResponseTrait;
+
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            $user = Auth::user();
+            $method = $request->route()->getActionMethod();
+            if (! $user->isManager() && in_array($method, ['users', 'managers', 'tasks'])) {
+                return $this->unauthorized('Only managers allowed to access');
+            }
+            return $next($request);
+        });
+    }
 
     public function users()
     {
