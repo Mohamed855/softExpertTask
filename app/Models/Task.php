@@ -20,10 +20,17 @@ class Task extends Model
     ];
 
     public const STATUSES = [
-        0 => 'Pending',
-        1 => 'In progress',
-        2 => 'Completed',
-        3 => 'Cancelled'
+        'Pending',
+        'In progress',
+        'Completed',
+        'Cancelled'
+    ];
+
+    public const FILTERS = [
+        'status',
+        'assigned_to',
+        'due_date_from',
+        'due_date_to'
     ];
 
     public function getStatus()

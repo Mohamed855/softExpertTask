@@ -3,15 +3,10 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\API\TaskRequest;
-use App\Http\Resources\TaskResource;
 use App\Http\Resources\UserResource;
 use App\Models\Task;
 use App\Models\User;
-use App\Services\TaskService;
 use App\Traits\ResponseTrait;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class ListController extends Controller
 {
